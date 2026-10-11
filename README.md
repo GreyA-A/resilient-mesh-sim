@@ -1,5 +1,7 @@
 # ResilientMesh — Мультиплатформне середовище імітаційного моделювання mesh-мереж
 
+[![Cross-Platform Build & Verification](https://github.com/GreyA-A/resilient-mesh-sim/actions/workflows/ci.yml/badge.svg)](https://github.com/GreyA-A/resilient-mesh-sim/actions)
+
 Програмний комплекс для моделювання самоорганізованих бездротових сенсорних мереж, верифікації протоколів передавання даних та аналізу стійкості зв'язку в умовах радіоелектронних завад (РЕБ).
 
 Проєкт розробляється в межах курсу «Мультиплатформне програмування».
