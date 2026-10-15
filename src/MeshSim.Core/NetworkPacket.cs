@@ -36,7 +36,7 @@ public sealed class NetworkPacket
 
         if (payloadBytes <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(payloadBytes), "Розмір корисного навантаження не може бути від'ємним.");
+            throw new ArgumentOutOfRangeException(nameof(payloadBytes), "Розмір корисного навантаження має бути більшим за нуль");
         }
 
         Id = id;
