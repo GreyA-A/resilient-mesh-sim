@@ -42,12 +42,13 @@ public class MeshNodeTests
 
         node.ConsumeEnergy(40.0);
         Assert.Equal(0.0, node.BatteryLevelPercent);
-        Assert.False(node.isActive);
+        Assert.False(node.IsActive);
     }
 
     [Theory]
     [InlineData(-10.0)]
     [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
     public void ConsumeEnergyThrowsArgumentOutOfRangeExceptionWhenAmountIsInvalid(double amount)
     {
         var node = new MeshNode("node-1", new Position(0, 0), transmissionRangeMeters: 100.0);
@@ -62,5 +63,16 @@ public class MeshNodeTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new MeshNode("node-1", new Position(0, 0), transmissionRangeMeters: 100.0, initialBatteryLevelPercent: battery));
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(-50.0)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public void ConstructorThrowsArgumentOutOfRangeExceptionWhenRangeIsInvalid(double range)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new MeshNode("node-1", new Position(0, 0), transmissionRangeMeters: range));
     }
 }

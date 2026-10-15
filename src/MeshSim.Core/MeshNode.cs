@@ -10,7 +10,7 @@ public sealed class MeshNode
     public double TransmissionRangeMeters { get; }
     public double BatteryLevelPercent { get; private set; }
 
-    public bool isActive => BatteryLevelPercent > 0.0;
+    public bool IsActive => BatteryLevelPercent > 0.0;
 
     public MeshNode(string id, Position position, double transmissionRangeMeters, double initialBatteryLevelPercent = 100.0)
     {
@@ -18,7 +18,7 @@ public sealed class MeshNode
         {
             throw new ArgumentException("Ідентифікатор вузла не може бути порожнім.", nameof(id));
         }
-        if (transmissionRangeMeters <= 0.0 || double.IsNaN(transmissionRangeMeters))
+        if (transmissionRangeMeters <= 0.0 || double.IsNaN(transmissionRangeMeters) || double.IsInfinity(transmissionRangeMeters))
         {
             throw new ArgumentOutOfRangeException(nameof(transmissionRangeMeters), "Радіус передачі має бути додатним дійсним числом.");
         }
@@ -39,7 +39,7 @@ public sealed class MeshNode
     {
         ArgumentNullException.ThrowIfNull(targetNode);
 
-        if(!isActive || !targetNode.isActive)
+        if(!IsActive || !targetNode.IsActive)
         {
             return false;
         }
