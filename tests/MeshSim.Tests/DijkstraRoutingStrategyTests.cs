@@ -287,4 +287,14 @@ public class DijkstraRoutingStrategyEdgeCaseTests
 
         Assert.Empty(_router.FindRoute(topology, "A", "C"));
     }
+
+    [Fact]
+    public void FindRouteReturnsSingleNodeWhenSourceEqualsDestination()
+    {
+        var topology = new NetworkTopology();
+        topology.AddNode(Node("A", 0, 0));
+
+        string[] expected = ["A"];
+        Assert.Equal(expected, _router.FindRoute(topology, "A", "A"));
+    }
 }
