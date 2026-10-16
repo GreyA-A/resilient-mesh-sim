@@ -10,5 +10,10 @@ public enum PacketDropReason
     JammedInTransit = 2,
     TtlExpired = 3,
     NodeBatteryDepleted = 4,
-    BufferOverflow = 5
+    /// <summary>
+    /// Зарезервовано: буфер вузла переповнено. Поки що рушієм не генерується
+    /// (планується з додаванням моделі черг у курсовій роботі).
+    /// </summary>
+    BufferOverflow = 5,
+    NodeNotFound = 6
 }

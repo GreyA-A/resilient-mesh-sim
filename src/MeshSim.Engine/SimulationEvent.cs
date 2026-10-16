@@ -31,7 +31,7 @@ public readonly record struct SimulationEvent
         string currentNodeId,
         PacketDropReason dropReason = PacketDropReason.None)
     {
-        if (timestampMs < 0.0)
+        if (timestampMs < 0.0 || double.IsNaN(timestampMs) || double.IsInfinity(timestampMs))
         {
             throw new ArgumentOutOfRangeException(nameof(timestampMs), "Час події має бути невід'ємним скінченним числом.");
         }

@@ -8,7 +8,7 @@ namespace MeshSim.Engine;
 public sealed class SimulationEngine
 {
     public const double DefaultHopDelayMs = 10.0;
-    public const double DefaulEnergyPerTransmissionPercent = 1.0;
+    public const double DefaultEnergyPerTransmissionPercent = 1.0;
 
     private readonly NetworkTopology _topology;
     private readonly IRoutingStrategy _routingStrategy;
@@ -30,7 +30,7 @@ public sealed class SimulationEngine
         NetworkTopology topology,
         IRoutingStrategy routingStrategy,
         double hopDelayMs = DefaultHopDelayMs,
-        double energyPerTransmissionPercent = DefaulEnergyPerTransmissionPercent)
+        double energyPerTransmissionPercent = DefaultEnergyPerTransmissionPercent)
     {
         ArgumentNullException.ThrowIfNull(topology);
         ArgumentNullException.ThrowIfNull(routingStrategy);
@@ -57,6 +57,11 @@ public sealed class SimulationEngine
     public void SchedulePacket(NetworkPacket packet, double timestampMs = 0.0)
     {
         ArgumentNullException.ThrowIfNull(packet);
+
+        if (timestampMs < CurrentTimeMs)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timestampMs), "Не можна планувати подію в минулому відносно поточного часу симуляції.");
+        }
 
         var initialEvent = new SimulationEvent(
             timestampMs,
@@ -115,7 +120,13 @@ public sealed class SimulationEngine
         }
 
         // Перевірка існування та заряду поточного вузла
-        if (!_topology.Nodes.TryGetValue(currentNodeId, out MeshNode? currentNode) || !currentNode.IsActive)
+        if (!_topology.Nodes.TryGetValue(currentNodeId, out MeshNode? currentNode))
+        {
+            RecordDrop(packet, currentNodeId, PacketDropReason.NodeNotFound);
+            return;
+        }
+
+        if (!currentNode.IsActive)
         {
             RecordDrop(packet, currentNodeId, PacketDropReason.NodeBatteryDepleted);
             return;
@@ -132,7 +143,8 @@ public sealed class SimulationEngine
         string nextHopNodeId = route[1];
         MeshNode nextHopNode = _topology.Nodes[nextHopNodeId];
 
-        // Витрата енергії на передачу
+        // Радіопередача відбулася незалежно від результату: відправник витрачає енергію,
+        // навіть якщо канал заглушено. Це навмисна поведінка.
         currentNode.ConsumeEnergy(EnergyPerTransmissionPercent);
 
         // Перевірка якості каналу (чи не перекритий РЕБ)

@@ -50,6 +50,21 @@ public sealed class SimulationResult
         ArgumentNullException.ThrowIfNull(dropsByReason);
         ArgumentNullException.ThrowIfNull(eventLog);
 
+        if ((long)totalPacketsDelivered + totalPacketsDropped > totalPacketsSent)
+        {
+            throw new ArgumentException("Сума доставлених і втрачених пакетів не може перевищувати кількість відправлених.");
+        }
+
+        if (dropsByReason.Values.Any(count => count < 0))
+        {
+            throw new ArgumentException("Кількість втрат за причиною не може бути від'ємною.", nameof(dropsByReason));
+        }
+
+        if (dropsByReason.Values.Sum(count => (long)count) != totalPacketsDropped)
+        {
+            throw new ArgumentException("Сума втрат за причинами має дорівнювати загальній кількості втрачених пакетів.", nameof(dropsByReason));
+        }
+
         TotalPacketsSent = totalPacketsSent;
         TotalPacketsDelivered = totalPacketsDelivered;
         TotalPacketsDropped = totalPacketsDropped;
