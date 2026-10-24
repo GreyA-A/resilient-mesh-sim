@@ -56,7 +56,7 @@ resilient-mesh-sim/
 ## Інструкція із запуску (Критерій E3: запуск без втручання автора)
 
 ### Системні вимоги:
-* Встановлений [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) або новіший.
+* Встановлений [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), версія **8.0.319 або новіша в межах 8.0.x** (вимога `global.json`). Якщо в системі є лише SDK 9+, `dotnet` відмовиться збирати проєкт, тому встановіть SDK 8.0 поруч.
 * Git.
 * Підтримувані ОС: Windows 10/11, Ubuntu 22.04+, macOS 12+.
 
@@ -75,7 +75,7 @@ resilient-mesh-sim/
    ```bash
    dotnet build ResilientMesh.sln --configuration Release --no-restore
    ```
-4. **Запустити автотести з перевіркою покриття:**
+4. **Запустити автотести (таблицю покриття Coverlet буде виведено в консоль, JSON-звіт `coverage.json` з'явиться в каталозі тестового проєкту):**
    ```bash
    dotnet test ResilientMesh.sln --configuration Release --no-build --verbosity normal
    ```
