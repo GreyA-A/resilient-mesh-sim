@@ -106,6 +106,17 @@ public sealed class SimulationEngine
             Step();
         }
 
+        return GetSnapshot();
+    }
+
+    /// <summary>
+    /// Повертає незалежний знімок метрик і журналу подій на поточний момент симуляції.
+    /// Знімок не змінюється наступними кроками рушія (журнал і розбивка втрат копіюються).
+    /// Доставка зараховується у момент передачі останнього стрибка, тому подія
+    /// PacketDelivered може потрапити в журнал пізніше, ніж лічильник доставлених зросте.
+    /// </summary>
+    public SimulationResult GetSnapshot()
+    {
         double avgHops = _packetsDelivered == 0
             ? 0.0
             : (double)_totalDeliveredHops / _packetsDelivered;
@@ -116,7 +127,7 @@ public sealed class SimulationEngine
             _packetsDropped,
             avgHops,
             new Dictionary<PacketDropReason, int>(_dropsByReason),
-            _eventLog.AsReadOnly());
+            _eventLog.ToArray());
     }
 
     private void ProcessEvent(SimulationEvent simEvent)
