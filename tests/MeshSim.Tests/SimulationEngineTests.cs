@@ -4,7 +4,7 @@ using Xunit;
 
 namespace MeshSim.Tests;
 
-public class SimulationEngineTests
+public partial class SimulationEngineTests
 {
     private static MeshNode Node(string id, double x, double y, double range = 120.0, double battery = 100.0)
         => new(id, new Position(x, y), range, battery);
