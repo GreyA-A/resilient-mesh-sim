@@ -74,17 +74,36 @@ public sealed class SimulationEngine
     }
 
     /// <summary>
+    /// Чи є в черзі необроблені події.
+    /// </summary>
+    public bool HasPendingEvents => _eventQueue.Count > 0;
+
+    /// <summary>
+    /// Обробляє рівно одну найближчу за часом подію.
+    /// Повертає оброблену подію або null, якщо черга порожня.
+    /// </summary>
+    public SimulationEvent? Step()
+    {
+        if (!_eventQueue.TryDequeue(out SimulationEvent currentEvent, out _))
+        {
+            return null;
+        }
+
+        CurrentTimeMs = currentEvent.TimestampMs;
+        _eventLog.Add(currentEvent);
+
+        ProcessEvent(currentEvent);
+        return currentEvent;
+    }
+
+    /// <summary>
     /// Виконує всі заплановані події в черзі до її вичерпання та повертає підсумкові метрики.
     /// </summary>
     public SimulationResult RunToCompletion()
     {
-        while (_eventQueue.Count > 0)
+        while (HasPendingEvents)
         {
-            SimulationEvent currentEvent = _eventQueue.Dequeue();
-            CurrentTimeMs = currentEvent.TimestampMs;
-            _eventLog.Add(currentEvent);
-
-            ProcessEvent(currentEvent);
+            Step();
         }
 
         double avgHops = _packetsDelivered == 0
