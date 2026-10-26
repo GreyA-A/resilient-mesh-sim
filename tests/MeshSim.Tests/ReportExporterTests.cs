@@ -59,7 +59,7 @@ public class ReportExporterTests
         Assert.Contains("\"schemaVersion\": 1", json);
         Assert.Contains("\"packetDeliveryRatio\": 0.5", json);
         Assert.Contains("\"NoRouteFound\": 1", json);
-        // Assert.Equal(2, ReportImporter.Parse(json).Metrics.TotalPacketsSent);
+        Assert.Equal(2, ReportImporter.Parse(json).Metrics.TotalPacketsSent);
     }
 
     [Fact]
