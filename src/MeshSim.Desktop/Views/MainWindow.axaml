@@ -1,11 +1,20 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MeshSim.Desktop.ViewModels"
         x:Class="MeshSim.Desktop.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
         Width="1100" Height="720"
         MinWidth="640" MinHeight="420"
-        Title="ResilientMesh">
-  <TextBlock Text="ResilientMesh"
-             FontSize="24"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+        Title="{Binding Title}">
+	<DockPanel>
+		<Border DockPanel.Dock="Bottom"
+				Padding="10,6"
+				BorderThickness="0,1,0,0"
+				BorderBrush="#40808080">
+			<TextBlock Text="{Binding StatusText}" />
+		</Border>
+		<TextBlock Text="Карта топології з'явиться в Issue #23"
+				   HorizontalAlignment="Center"
+				   VerticalAlignment="Center" />
+	</DockPanel>
 </Window>
