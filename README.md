@@ -79,7 +79,13 @@ resilient-mesh-sim/
    ```bash
    dotnet test ResilientMesh.sln --configuration Release --no-build --verbosity normal
    ```
-> **Примітка:** команда запуску графічного інтерфейсу з'явиться на етапі релізу Чекпоінта 2/3.
+5. **Запустити графічний інтерфейс:**
+   ```bash
+   dotnet run --project src/MeshSim.Desktop
+   ```
+   Журнал роботи пишеться в `%LOCALAPPDATA%\MeshSim\logs` (Windows) або `~/.local/share/MeshSim/logs` (Linux/macOS) у файли `meshsim-РРРРММДД.log`.
+
+> **Примітка для Linux:** на мінімальних дистрибутивах без графічних бібліотек застосунок може не стартувати. Встановіть `libfontconfig1` (наприклад, `sudo apt install libfontconfig1`).
 
 ---
 
