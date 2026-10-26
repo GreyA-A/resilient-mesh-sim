@@ -7,6 +7,9 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+
+	<Include>[MeshSim.Core]*,[MeshSim.Engine]*,[MeshSim.Desktop]*</Include>
+	<Exclude>[MeshSim.Desktop]CompiledAvaloniaXaml.*</Exclude>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\MeshSim.Core\MeshSim.Core.csproj" />
     <ProjectReference Include="..\..\src\MeshSim.Engine\MeshSim.Engine.csproj" />
+    <ProjectReference Include="..\..\src\MeshSim.Desktop\MeshSim.Desktop.csproj" />
   </ItemGroup>
 
 </Project>
