@@ -1,3 +1,5 @@
+using MeshSim.Engine;
+
 namespace MeshSim.Desktop.Rendering;
 
 /// <summary>
@@ -30,3 +32,23 @@ public readonly record struct ZoneVisual(
     ScreenPoint Center,
     double RadiusPx,
     ZoneStyle Style);
+
+/// <summary>
+/// Маркер пакета на вузлі, де відбулась остання подія, із підписом і кольором за типом події.
+/// </summary>
+public readonly record struct PacketMarkerVisual(
+    string PacketId,
+    string Caption,
+    ScreenPoint Position,
+    double RadiusPx,
+    SimulationEventType EventType,
+    RgbaColor Color);
+
+/// <summary>
+/// Підсвічений сегмент, яким пакет щойно пройшов (від попереднього вузла до поточного).
+/// </summary>
+public readonly record struct ActiveSegmentVisual(
+    ScreenPoint From,
+    ScreenPoint To,
+    RgbaColor Color,
+    double Thickness);
