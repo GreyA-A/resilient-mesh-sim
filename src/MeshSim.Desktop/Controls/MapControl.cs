@@ -93,9 +93,19 @@ public sealed class MapControl : Control
             DrawLink(context, link);
         }
 
+        if (scene.Segment is { } segment)
+        {
+            DrawSegment(context, segment);
+        }
+
         foreach (NodeVisual node in scene.Nodes)
         {
             DrawNode(context, node);
+        }
+
+        if (scene.Marker is { } marker)
+        {
+            DrawMarker(context, marker);
         }
     }
 
@@ -125,6 +135,12 @@ public sealed class MapControl : Control
         context.DrawLine(pen, ToPoint(link.From), ToPoint(link.To));
     }
 
+    private static void DrawSegment(DrawingContext context, ActiveSegmentVisual segment)
+    {
+        var pen = new Pen(CreateBrush(segment.Color), segment.Thickness, lineCap: PenLineCap.Round);
+        context.DrawLine(pen, ToPoint(segment.From), ToPoint(segment.To));
+    }
+
     private static void DrawNode(DrawingContext context, NodeVisual node)
     {
         Point center = ToPoint(node.Center);
@@ -143,22 +159,36 @@ public sealed class MapControl : Control
                 new Rect(barLeft, barTop, BatteryBarWidth * node.Style.BatteryFraction, BatteryBarHeight));
         }
 
-        DrawLabel(context, node.Id, center.X, center.Y - node.RadiusPx - 4.0, anchorAbove: true);
-        DrawLabel(context, node.BatteryText, center.X, barTop + BatteryBarHeight + 2.0, anchorAbove: false);
+        DrawCenteredLabel(context, node.Id, center.X, center.Y - node.RadiusPx - 4.0, anchorAbove: true);
+        DrawCenteredLabel(context, node.BatteryText, center.X, barTop + BatteryBarHeight + 2.0, anchorAbove: false);
     }
 
-    private static void DrawLabel(DrawingContext context, string text, double centerX, double anchorY, bool anchorAbove)
+    private static void DrawMarker(DrawingContext context, PacketMarkerVisual marker)
     {
-        var label = new FormattedText(
+        Point center = ToPoint(marker.Position);
+        var ring = new Pen(CreateBrush(marker.Color), 3.0);
+        context.DrawEllipse(CreateBrush(marker.Color.WithAlpha(70)), ring, center, marker.RadiusPx, marker.RadiusPx);
+
+        FormattedText caption = CreateLabel(marker.Caption);
+        context.DrawText(caption, new Point(center.X + marker.RadiusPx + 4.0, center.Y - (caption.Height / 2.0)));
+    }
+
+    private static void DrawCenteredLabel(DrawingContext context, string text, double centerX, double anchorY, bool anchorAbove)
+    {
+        FormattedText label = CreateLabel(text);
+        double top = anchorAbove ? anchorY - label.Height : anchorY;
+        context.DrawText(label, new Point(centerX - (label.Width / 2.0), top));
+    }
+
+    private static FormattedText CreateLabel(string text)
+    {
+        return new FormattedText(
             text,
             CultureInfo.InvariantCulture,
             FlowDirection.LeftToRight,
             Typeface.Default,
             LabelFontSize,
             CreateBrush(MapPalette.LabelText));
-
-        double top = anchorAbove ? anchorY - label.Height : anchorY;
-        context.DrawText(label, new Point(centerX - (label.Width / 2.0), top));
     }
 
     private static SolidColorBrush CreateBrush(RgbaColor color)

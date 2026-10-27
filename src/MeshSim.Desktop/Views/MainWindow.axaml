@@ -4,16 +4,103 @@
         xmlns:controls="using:MeshSim.Desktop.Controls"
         x:Class="MeshSim.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Width="1100" Height="720"
-        MinWidth="640" MinHeight="420"
+        Width="1280" Height="760"
+        MinWidth="900" MinHeight="520"
         Title="{Binding Title}">
 	<DockPanel>
+
 		<Border DockPanel.Dock="Bottom"
 				Padding="10,6"
 				BorderThickness="0,1,0,0"
 				BorderBrush="#40808080">
-			<TextBlock Text="{Binding StatusText}" />
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Grid.Column="0" Text="{Binding StatusText}" />
+				<TextBlock Grid.Column="1" Text="{Binding Simulation.StateText}" FontWeight="SemiBold" />
+			</Grid>
 		</Border>
+
+		<Border DockPanel.Dock="Top"
+				Padding="10,8"
+				BorderThickness="0,0,0,1"
+				BorderBrush="#40808080"
+				DataContext="{Binding Simulation}"
+				x:DataType="vm:SimulationViewModel">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<Button Content="Старт" Command="{Binding PlayCommand}" />
+				<Button Content="Пауза" Command="{Binding PauseCommand}" />
+				<Button Content="Крок" Command="{Binding StepCommand}" />
+				<Button Content="Скинути" Command="{Binding ResetCommand}" />
+				<TextBlock Text="Швидкість:" VerticalAlignment="Center" Margin="12,0,0,0" />
+				<ComboBox ItemsSource="{Binding SpeedOptions}"
+						  SelectedItem="{Binding SelectedSpeed}"
+						  MinWidth="90">
+					<ComboBox.ItemTemplate>
+						<DataTemplate x:DataType="vm:SimulationSpeedOption">
+							<TextBlock Text="{Binding Label}" />
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+			</StackPanel>
+		</Border>
+
+		<Border DockPanel.Dock="Right"
+				Width="380"
+				Padding="12"
+				BorderThickness="1,0,0,0"
+				BorderBrush="#40808080"
+				DataContext="{Binding Simulation}"
+				x:DataType="vm:SimulationViewModel">
+			<DockPanel>
+
+				<StackPanel DockPanel.Dock="Top"
+							Spacing="2"
+							DataContext="{Binding Metrics}"
+							x:DataType="vm:MetricsViewModel">
+					<TextBlock Text="Метрики" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,6" />
+					<Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+						<TextBlock Grid.Row="0" Grid.Column="0" Text="Віртуальний час" Margin="0,2" />
+						<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentTimeText}" Margin="0,2" />
+						<TextBlock Grid.Row="1" Grid.Column="0" Text="Надіслано пакетів" Margin="0,2" />
+						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TotalPacketsSent}" Margin="0,2" />
+						<TextBlock Grid.Row="2" Grid.Column="0" Text="Доставлено" Margin="0,2" />
+						<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding TotalPacketsDelivered}" Margin="0,2" />
+						<TextBlock Grid.Row="3" Grid.Column="0" Text="Втрачено" Margin="0,2" />
+						<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalPacketsDropped}" Margin="0,2" />
+						<TextBlock Grid.Row="4" Grid.Column="0" Text="PDR (частка доставлених)" Margin="0,2" />
+						<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PacketDeliveryRatioText}" Margin="0,2" />
+						<TextBlock Grid.Row="5" Grid.Column="0" Text="Середня кількість стрибків" Margin="0,2" />
+						<TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AverageHopCountText}" Margin="0,2" />
+					</Grid>
+
+					<TextBlock Text="Втрати за причинами" FontWeight="SemiBold" Margin="0,10,0,2" />
+					<ItemsControl ItemsSource="{Binding DropsByReason}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate x:DataType="vm:DropReasonRow">
+								<Grid ColumnDefinitions="*,Auto">
+									<TextBlock Grid.Column="0" Text="{Binding Description}" />
+									<TextBlock Grid.Column="1" Text="{Binding Count}" />
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+
+				<TextBlock DockPanel.Dock="Top"
+						   Text="Журнал подій (нові зверху)"
+						   FontWeight="SemiBold"
+						   Margin="0,14,0,4" />
+				<ListBox ItemsSource="{Binding EventLog}">
+					<ListBox.ItemTemplate>
+						<DataTemplate x:DataType="x:String">
+							<TextBlock Text="{Binding .}" TextWrapping="Wrap" FontSize="12" />
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+
+			</DockPanel>
+		</Border>
+
 		<controls:MapControl Map="{Binding Map}" />
+
 	</DockPanel>
 </Window>
