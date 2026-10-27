@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MeshSim.Desktop.ViewModels"
+        xmlns:controls="using:MeshSim.Desktop.Controls"
         x:Class="MeshSim.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Width="1100" Height="720"
@@ -13,8 +14,6 @@
 				BorderBrush="#40808080">
 			<TextBlock Text="{Binding StatusText}" />
 		</Border>
-		<TextBlock Text="Карта топології з'явиться в Issue #23"
-				   HorizontalAlignment="Center"
-				   VerticalAlignment="Center" />
+		<controls:MapControl Map="{Binding Map}" />
 	</DockPanel>
 </Window>

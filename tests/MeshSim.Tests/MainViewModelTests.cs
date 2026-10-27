@@ -22,6 +22,37 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void ConstructorLoadsDemoScenarioIntoMap()
+    {
+        var viewModel = new MainViewModel(new ListLogger());
+
+        Assert.Equal(6, viewModel.Map.Topology.Nodes.Count);
+        Assert.Equal(2, viewModel.Map.Topology.JammingZones.Count);
+    }
+
+    [Fact]
+    public void StatusTextDescribesLoadedScenario()
+    {
+        var viewModel = new MainViewModel(new ListLogger());
+
+        Assert.Contains("Демонстраційний сценарій", viewModel.StatusText, StringComparison.Ordinal);
+        Assert.Contains("вузлів — 6", viewModel.StatusText, StringComparison.Ordinal);
+        Assert.Contains("зон завад — 2", viewModel.StatusText, StringComparison.Ordinal);
+        Assert.Contains("пакетів — 1", viewModel.StatusText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MapReceivesSceneAfterResize()
+    {
+        var viewModel = new MainViewModel(new ListLogger());
+
+        viewModel.Map.Resize(900.0, 600.0);
+
+        Assert.Equal(6, viewModel.Map.Scene.Nodes.Count);
+        Assert.Equal(2, viewModel.Map.Scene.Zones.Count);
+    }
+
+    [Fact]
     public void StatusTextRaisesPropertyChangedWhenValueChanges()
     {
         var viewModel = new MainViewModel(new ListLogger());
