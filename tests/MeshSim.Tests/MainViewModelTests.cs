@@ -6,12 +6,15 @@ namespace MeshSim.Tests;
 
 public class MainViewModelTests
 {
+    private static MainViewModel Create(ListLogger? logger = null)
+        => new(logger ?? new ListLogger(), new ManualSimulationTimer());
+
     [Fact]
     public void ConstructorSetsTitleAndLogsInitialization()
     {
         var logger = new ListLogger();
 
-        var viewModel = new MainViewModel(logger);
+        MainViewModel viewModel = Create(logger);
 
         Assert.Equal(MainViewModel.AppTitle, viewModel.Title);
         Assert.IsAssignableFrom<ObservableObject>(viewModel);
@@ -22,18 +25,20 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void ConstructorLoadsDemoScenarioIntoMap()
+    public void ConstructorLoadsDemoScenarioIntoMapThroughSimulation()
     {
-        var viewModel = new MainViewModel(new ListLogger());
+        MainViewModel viewModel = Create();
 
+        Assert.Same(viewModel.Map, viewModel.Simulation.Map);
         Assert.Equal(6, viewModel.Map.Topology.Nodes.Count);
         Assert.Equal(2, viewModel.Map.Topology.JammingZones.Count);
+        Assert.Equal(SimulationState.Ready, viewModel.Simulation.State);
     }
 
     [Fact]
     public void StatusTextDescribesLoadedScenario()
     {
-        var viewModel = new MainViewModel(new ListLogger());
+        MainViewModel viewModel = Create();
 
         Assert.Contains("Демонстраційний сценарій", viewModel.StatusText, StringComparison.Ordinal);
         Assert.Contains("вузлів — 6", viewModel.StatusText, StringComparison.Ordinal);
@@ -44,7 +49,7 @@ public class MainViewModelTests
     [Fact]
     public void MapReceivesSceneAfterResize()
     {
-        var viewModel = new MainViewModel(new ListLogger());
+        MainViewModel viewModel = Create();
 
         viewModel.Map.Resize(900.0, 600.0);
 
@@ -53,9 +58,26 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void DemoPacketIsDeliveredStepByStepThroughSimulation()
+    {
+        MainViewModel viewModel = Create();
+
+        for (int i = 0; i < 4; i++)
+        {
+            viewModel.Simulation.StepCommand.Execute(null);
+        }
+
+        Assert.Equal(SimulationState.Finished, viewModel.Simulation.State);
+        Assert.Equal(4, viewModel.Simulation.EventLog.Count);
+        Assert.Equal("100.0 %", viewModel.Simulation.Metrics.PacketDeliveryRatioText);
+        Assert.Equal("3.00", viewModel.Simulation.Metrics.AverageHopCountText);
+        Assert.Equal("60.0 мс", viewModel.Simulation.Metrics.CurrentTimeText);
+    }
+
+    [Fact]
     public void StatusTextRaisesPropertyChangedWhenValueChanges()
     {
-        var viewModel = new MainViewModel(new ListLogger());
+        MainViewModel viewModel = Create();
 
         Assert.PropertyChanged(viewModel, nameof(MainViewModel.StatusText), () => viewModel.StatusText = "Нова подія");
 
@@ -63,8 +85,9 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void ConstructorThrowsArgumentNullExceptionForNullLogger()
+    public void ConstructorThrowsArgumentNullExceptionForNullArguments()
     {
-        Assert.Throws<ArgumentNullException>(() => new MainViewModel(null!));
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(null!, new ManualSimulationTimer()));
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(new ListLogger(), null!));
     }
 }

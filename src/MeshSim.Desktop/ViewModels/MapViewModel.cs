@@ -4,7 +4,7 @@ using MeshSim.Engine;
 namespace MeshSim.Desktop.ViewModels;
 
 /// <summary>
-/// Модель подання карти: зберігає топологію й розмір вікна та перебудовує сцену при їх зміні.
+/// Модель подання карти: зберігає топологію, розмір вікна та активність пакета й перебудовує сцену при їх зміні.
 /// </summary>
 public sealed class MapViewModel : ViewModelBase
 {
@@ -12,6 +12,7 @@ public sealed class MapViewModel : ViewModelBase
 
     private NetworkTopology _topology = new();
     private MapScene _scene = MapScene.Empty;
+    private PacketActivity? _activity;
     private double _viewportWidth;
     private double _viewportHeight;
 
@@ -28,15 +29,33 @@ public sealed class MapViewModel : ViewModelBase
     public double ViewportHeight => _viewportHeight;
 
     /// <summary>
+    /// Остання подія пакета, що відображається на карті (null, якщо нічого не відбувалось).
+    /// </summary>
+    public PacketActivity? Activity => _activity;
+
+    /// <summary>
     /// Поточне перетворення світ → екран (null, поки вікно має нульовий розмір).
     /// </summary>
     public ViewportTransform? Transform { get; private set; }
 
+    /// <summary>
+    /// Замінює топологію; активність пакета скидається, бо вона стосується попередньої топології.
+    /// </summary>
     public void SetTopology(NetworkTopology topology)
     {
         ArgumentNullException.ThrowIfNull(topology);
 
         _topology = topology;
+        _activity = null;
+        Rebuild();
+    }
+
+    /// <summary>
+    /// Задає (або прибирає, якщо null) активність пакета й перебудовує сцену з актуальним станом вузлів.
+    /// </summary>
+    public void SetActivity(PacketActivity? activity)
+    {
+        _activity = activity;
         Rebuild();
     }
 
@@ -77,6 +96,6 @@ public sealed class MapViewModel : ViewModelBase
             _viewportWidth,
             _viewportHeight,
             ViewportPaddingPixels);
-        Scene = MapSceneBuilder.Build(_topology, Transform);
+        Scene = MapSceneBuilder.Build(_topology, Transform, _activity);
     }
 }

@@ -20,4 +20,8 @@ public static class MapPalette
     public static readonly RgbaColor RangeStroke = new(52, 152, 219, 70);
     public static readonly RgbaColor ZoneActive = new(231, 76, 60);
     public static readonly RgbaColor ZoneInactive = new(149, 165, 166);
+    public static readonly RgbaColor MarkerQueued = new(52, 152, 219);
+    public static readonly RgbaColor MarkerForwarded = new(241, 196, 15);
+    public static readonly RgbaColor MarkerDelivered = new(46, 204, 113);
+    public static readonly RgbaColor MarkerDropped = new(231, 76, 60);
 }

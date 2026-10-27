@@ -24,7 +24,7 @@ public partial class App : Application
             var handler = new GlobalExceptionHandler(AppServices.Logger, new ErrorDialogNotifier());
             RegisterGlobalHandlers(handler);
 
-            desktop.MainWindow = new MainWindow { DataContext = new MainViewModel(AppServices.Logger) };
+            desktop.MainWindow = new MainWindow { DataContext = new MainViewModel(AppServices.Logger, new AvaloniaSimulationTimer()) };
         }
 
         base.OnFrameworkInitializationCompleted();

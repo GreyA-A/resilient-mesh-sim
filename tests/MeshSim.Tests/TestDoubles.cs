@@ -30,3 +30,33 @@ internal sealed class ThrowingNotifier : IUserNotifier
         throw new InvalidOperationException("dialog failed");
     }
 }
+
+/// <summary>
+/// Таймер, яким керує тест: тік виникає лише після виклику <see cref="FireTick"/>.
+/// </summary>
+internal sealed class ManualSimulationTimer : ISimulationTimer
+{
+    public bool IsRunning { get; private set; }
+    public TimeSpan Interval { get; set; }
+    public int StartCount { get; private set; }
+    public int PauseCount { get; private set; }
+
+    public event EventHandler? Tick;
+
+    public void Start()
+    {
+        IsRunning = true;
+        StartCount++;
+    }
+
+    public void Pause()
+    {
+        IsRunning = false;
+        PauseCount++;
+    }
+
+    public void FireTick()
+    {
+        Tick?.Invoke(this, EventArgs.Empty);
+    }
+}
