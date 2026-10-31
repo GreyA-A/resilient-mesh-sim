@@ -5,7 +5,7 @@ using MeshSim.Engine;
 namespace MeshSim.Desktop.Rendering;
 
 /// <summary>
-/// Перетворює топологію та (необов'язково) останню подію пакета на екранні примітиви.
+/// Перетворює топологію, останню подію пакета та виділення на екранні примітиви.
 /// Вузли та лінки впорядковуються за Id, тож результат детермінований.
 /// </summary>
 public static class MapSceneBuilder
@@ -13,8 +13,13 @@ public static class MapSceneBuilder
     public const double NodeRadiusPx = 9.0;
     public const double MarkerRadiusPx = 15.0;
     public const double SegmentThicknessPx = 5.0;
+    public const double SelectionMarginPx = 6.0;
 
-    public static MapScene Build(NetworkTopology topology, ViewportTransform transform, PacketActivity? activity = null)
+    public static MapScene Build(
+        NetworkTopology topology,
+        ViewportTransform transform,
+        PacketActivity? activity = null,
+        MapTarget? selection = null)
     {
         ArgumentNullException.ThrowIfNull(topology);
         ArgumentNullException.ThrowIfNull(transform);
@@ -63,7 +68,13 @@ public static class MapSceneBuilder
             segment = BuildSegment(topology, transform, current, position, color);
         }
 
-        return new MapScene(BuildLinks(topology, transform, ordered), nodes, zones, marker, segment);
+        return new MapScene(
+            BuildLinks(topology, transform, ordered),
+            nodes,
+            zones,
+            marker,
+            segment,
+            BuildSelection(topology, transform, selection));
     }
 
     private static string BuildCaption(PacketActivity activity)
@@ -88,6 +99,28 @@ public static class MapSceneBuilder
         }
 
         return new ActiveSegmentVisual(transform.ToScreen(previous.Position), end, color, SegmentThicknessPx);
+    }
+
+    private static SelectionVisual? BuildSelection(NetworkTopology topology, ViewportTransform transform, MapTarget? selection)
+    {
+        if (selection is not { } target)
+        {
+            return null;
+        }
+
+        if (target.Kind == MapTargetKind.Node)
+        {
+            return topology.Nodes.TryGetValue(target.Id, out MeshNode? node)
+                ? new SelectionVisual(transform.ToScreen(node.Position), NodeRadiusPx + SelectionMarginPx)
+                : null;
+        }
+
+        JammingZone? zone = topology.JammingZones
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, target.Id, StringComparison.Ordinal));
+
+        return zone is null
+            ? null
+            : new SelectionVisual(transform.ToScreen(zone.Center), transform.ScaleLength(zone.RadiusMeters) + SelectionMarginPx);
     }
 
     private static List<LinkVisual> BuildLinks(NetworkTopology topology, ViewportTransform transform, MeshNode[] ordered)

@@ -1,7 +1,7 @@
 namespace MeshSim.Desktop.Rendering;
 
 /// <summary>
-/// Готовий до малювання набір примітивів карти, включно з маркером та активним сегментом пакета.
+/// Готовий до малювання набір примітивів карти: вузли, лінки, зони, маркер і сегмент пакета, кільце виділення.
 /// </summary>
 public sealed class MapScene
 {
@@ -10,7 +10,8 @@ public sealed class MapScene
         IReadOnlyList<NodeVisual> nodes,
         IReadOnlyList<ZoneVisual> zones,
         PacketMarkerVisual? marker = null,
-        ActiveSegmentVisual? segment = null)
+        ActiveSegmentVisual? segment = null,
+        SelectionVisual? selection = null)
     {
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(nodes);
@@ -21,6 +22,7 @@ public sealed class MapScene
         Zones = zones;
         Marker = marker;
         Segment = segment;
+        Selection = selection;
     }
 
     public static MapScene Empty { get; } = new([], [], []);
@@ -30,4 +32,5 @@ public sealed class MapScene
     public IReadOnlyList<ZoneVisual> Zones { get; }
     public PacketMarkerVisual? Marker { get; }
     public ActiveSegmentVisual? Segment { get; }
+    public SelectionVisual? Selection { get; }
 }

@@ -24,4 +24,5 @@ public static class MapPalette
     public static readonly RgbaColor MarkerForwarded = new(241, 196, 15);
     public static readonly RgbaColor MarkerDelivered = new(46, 204, 113);
     public static readonly RgbaColor MarkerDropped = new(231, 76, 60);
+    public static readonly RgbaColor SelectionRing = new(0, 200, 255);
 }
