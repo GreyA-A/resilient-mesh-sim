@@ -60,3 +60,57 @@ internal sealed class ManualSimulationTimer : ISimulationTimer
         Tick?.Invoke(this, EventArgs.Empty);
     }
 }
+
+/// <summary>
+/// Фейкові діалоги: повертають шляхи, задані тестом (або null, якщо «користувач скасував»).
+/// </summary>
+internal sealed class StubFileDialogService : IFileDialogService
+{
+    public string? OpenScenarioPath { get; set; }
+    public string? SaveScenarioPath { get; set; }
+    public string? SaveReportJsonPath { get; set; }
+    public string? SaveReportCsvPath { get; set; }
+    public string? OpenReportJsonPath { get; set; }
+
+    /// <summary>
+    /// Виконується під час «діалогу» перед поверненням шляху (імітує дії користувача, поки діалог відкритий).
+    /// </summary>
+    public Action? WhileDialogIsOpen { get; set; }
+    public int PickCount { get; private set; }
+    public List<string> RequestedFileNames { get; } = [];
+
+    public Task<string?> PickOpenScenarioPathAsync()
+    {
+        return Respond(OpenScenarioPath);
+    }
+
+    public Task<string?> PickSaveScenarioPathAsync(string suggestedFileName)
+    {
+        RequestedFileNames.Add(suggestedFileName);
+        return Respond(SaveScenarioPath);
+    }
+
+    public Task<string?> PickSaveReportJsonPathAsync(string suggestedFileName)
+    {
+        RequestedFileNames.Add(suggestedFileName);
+        return Respond(SaveReportJsonPath);
+    }
+
+    public Task<string?> PickSaveReportCsvPathAsync(string suggestedFileName)
+    {
+        RequestedFileNames.Add(suggestedFileName);
+        return Respond(SaveReportCsvPath);
+    }
+
+    public Task<string?> PickOpenReportJsonPathAsync()
+    {
+        return Respond(OpenReportJsonPath);
+    }
+
+    private Task<string?> Respond(string? path)
+    {
+        PickCount++;
+        WhileDialogIsOpen?.Invoke();
+        return Task.FromResult(path);
+    }
+}
