@@ -36,6 +36,30 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void EditorIsWiredToSimulationAndMap()
+    {
+        MainViewModel viewModel = Create();
+
+        Assert.Same(viewModel.Simulation, viewModel.Editor.Simulation);
+        Assert.Same(viewModel.Map, viewModel.Editor.Map);
+        Assert.Single(viewModel.Editor.Packets);
+        Assert.True(viewModel.Editor.IsEditingEnabled);
+    }
+
+    [Fact]
+    public void EditingThroughEditorUpdatesSimulationScenarioAndMap()
+    {
+        MainViewModel viewModel = Create();
+        viewModel.Editor.NodeId = "N7";
+
+        viewModel.Editor.AddNodeCommand.Execute(null);
+
+        Assert.False(viewModel.Editor.HasError);
+        Assert.Equal(7, viewModel.Simulation.Scenario.Nodes.Count);
+        Assert.True(viewModel.Map.Topology.Nodes.ContainsKey("N7"));
+    }
+
+    [Fact]
     public void StatusTextDescribesLoadedScenario()
     {
         MainViewModel viewModel = Create();

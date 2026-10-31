@@ -4,7 +4,8 @@ using MeshSim.Engine;
 namespace MeshSim.Desktop.ViewModels;
 
 /// <summary>
-/// Модель подання карти: зберігає топологію, розмір вікна та активність пакета й перебудовує сцену при їх зміні.
+/// Модель подання карти: зберігає топологію, розмір вікна, активність пакета та виділення
+/// і перебудовує сцену при їх зміні. Під час перетягування вид «заморожується».
 /// </summary>
 public sealed class MapViewModel : ViewModelBase
 {
@@ -13,6 +14,8 @@ public sealed class MapViewModel : ViewModelBase
     private NetworkTopology _topology = new();
     private MapScene _scene = MapScene.Empty;
     private PacketActivity? _activity;
+    private MapTarget? _selection;
+    private ViewportTransform? _frozenTransform;
     private double _viewportWidth;
     private double _viewportHeight;
 
@@ -34,12 +37,27 @@ public sealed class MapViewModel : ViewModelBase
     public PacketActivity? Activity => _activity;
 
     /// <summary>
+    /// Вибраний вузол або зона завад (null, якщо нічого не вибрано).
+    /// </summary>
+    public MapTarget? Selection
+    {
+        get => _selection;
+        private set => SetProperty(ref _selection, value);
+    }
+
+    /// <summary>
+    /// Чи триває перетягування (вид заморожено, тож масштаб і зсув не змінюються під курсором).
+    /// </summary>
+    public bool IsDragging => _frozenTransform is not null;
+
+    /// <summary>
     /// Поточне перетворення світ → екран (null, поки вікно має нульовий розмір).
     /// </summary>
     public ViewportTransform? Transform { get; private set; }
 
     /// <summary>
-    /// Замінює топологію; активність пакета скидається, бо вона стосується попередньої топології.
+    /// Замінює топологію; активність пакета скидається, а виділення зберігається, лише якщо
+    /// вибраний об'єкт існує в новій топології.
     /// </summary>
     public void SetTopology(NetworkTopology topology)
     {
@@ -47,6 +65,12 @@ public sealed class MapViewModel : ViewModelBase
 
         _topology = topology;
         _activity = null;
+
+        if (_selection is { } current && !Exists(topology, current))
+        {
+            Selection = null;
+        }
+
         Rebuild();
     }
 
@@ -56,6 +80,33 @@ public sealed class MapViewModel : ViewModelBase
     public void SetActivity(PacketActivity? activity)
     {
         _activity = activity;
+        Rebuild();
+    }
+
+    /// <summary>
+    /// Задає (або прибирає, якщо null) виділення й перебудовує сцену.
+    /// </summary>
+    public void SetSelection(MapTarget? selection)
+    {
+        Selection = selection;
+        Rebuild();
+    }
+
+    /// <summary>
+    /// Заморожує поточне перетворення світ → екран на час перетягування.
+    /// Якщо вікно має нульовий розмір, нічого не заморожується.
+    /// </summary>
+    public void BeginDrag()
+    {
+        _frozenTransform = Transform;
+    }
+
+    /// <summary>
+    /// Розморожує вид і вписує сцену у вікно заново.
+    /// </summary>
+    public void EndDrag()
+    {
+        _frozenTransform = null;
         Rebuild();
     }
 
@@ -82,6 +133,13 @@ public sealed class MapViewModel : ViewModelBase
         Rebuild();
     }
 
+    private static bool Exists(NetworkTopology topology, MapTarget target)
+    {
+        return target.Kind == MapTargetKind.Node
+            ? topology.Nodes.ContainsKey(target.Id)
+            : topology.JammingZones.Any(zone => string.Equals(zone.Id, target.Id, StringComparison.Ordinal));
+    }
+
     private void Rebuild()
     {
         if (_viewportWidth <= 0.0 || _viewportHeight <= 0.0)
@@ -91,11 +149,11 @@ public sealed class MapViewModel : ViewModelBase
             return;
         }
 
-        Transform = ViewportTransform.Fit(
+        Transform = _frozenTransform ?? ViewportTransform.Fit(
             WorldBounds.FromTopology(_topology),
             _viewportWidth,
             _viewportHeight,
             ViewportPaddingPixels);
-        Scene = MapSceneBuilder.Build(_topology, Transform, _activity);
+        Scene = MapSceneBuilder.Build(_topology, Transform, _activity, _selection);
     }
 }

@@ -10,7 +10,8 @@ using MeshSim.Engine.IO;
 namespace MeshSim.Desktop.ViewModels;
 
 /// <summary>
-/// Керування симуляцією: Play/Pause/Step/Reset, швидкість, журнал подій, метрики та активність пакета на карті.
+/// Керування симуляцією: Play/Pause/Step/Reset, швидкість, журнал подій, метрики, активність пакета на карті
+/// та заміна сценарію (редагування сцени).
 /// </summary>
 public sealed class SimulationViewModel : ViewModelBase
 {
@@ -21,11 +22,11 @@ public sealed class SimulationViewModel : ViewModelBase
 
     private const int DefaultSpeedIndex = 2;
 
-    private readonly ScenarioDefinition _scenario;
     private readonly ISimulationTimer _timer;
     private readonly IAppLogger _logger;
     private readonly Dictionary<string, string> _lastNodeByPacket = new(StringComparer.Ordinal);
 
+    private ScenarioDefinition _scenario;
     private SimulationEngine _engine;
     private SimulationState _state = SimulationState.Ready;
     private SimulationSpeedOption _selectedSpeed;
@@ -68,6 +69,11 @@ public sealed class SimulationViewModel : ViewModelBase
     public MapViewModel Map { get; }
 
     public MetricsViewModel Metrics { get; }
+
+    /// <summary>
+    /// Поточний сценарій (джерело правди для карти, редактора та майбутнього збереження у файл).
+    /// </summary>
+    public ScenarioDefinition Scenario => _scenario;
 
     /// <summary>
     /// Журнал подій; найновіші рядки зверху.
@@ -125,6 +131,17 @@ public sealed class SimulationViewModel : ViewModelBase
             SimulationState.Finished => "Завершено",
             _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Невідомий стан симуляції.")
         };
+    }
+
+    /// <summary>
+    /// Замінює сценарій: зупиняє таймер, будує свіжу топологію й рушій і переводить стан у «Готово».
+    /// Некоректний сценарій відхиляється InvalidDataException до будь-якої зміни стану.
+    /// </summary>
+    public void LoadScenario(ScenarioDefinition scenario)
+    {
+        ArgumentNullException.ThrowIfNull(scenario);
+
+        ReplaceRuntime(scenario);
     }
 
     private bool CanPlay()
@@ -187,15 +204,8 @@ public sealed class SimulationViewModel : ViewModelBase
 
     private void Reset()
     {
-        _timer.Pause();
-
-        ScenarioRuntime runtime = ScenarioFactory.Build(_scenario);
-        _engine = runtime.Simulation;
-        ApplyRuntime(runtime);
-
-        State = SimulationState.Ready;
+        ReplaceRuntime(_scenario);
         _logger.LogInfo("Симуляцію скинуто до початкового стану сценарію.");
-        NotifyCommands();
     }
 
     private void OnTick(object? sender, EventArgs e)
@@ -250,6 +260,24 @@ public sealed class SimulationViewModel : ViewModelBase
         _logger.LogInfo(string.Create(
             CultureInfo.InvariantCulture,
             $"Симуляцію завершено: доставлено {Metrics.TotalPacketsDelivered} з {Metrics.TotalPacketsSent}, PDR {Metrics.PacketDeliveryRatioText}."));
+        NotifyCommands();
+    }
+
+    /// <summary>
+    /// Будує свіжий ScenarioRuntime (кидає, якщо сценарій некоректний, до зміни стану),
+    /// зупиняє таймер, підміняє сценарій і рушій та повертає стан «Готово».
+    /// </summary>
+    private void ReplaceRuntime(ScenarioDefinition scenario)
+    {
+        ScenarioRuntime runtime = ScenarioFactory.Build(scenario);
+
+        _timer.Pause();
+        _scenario = scenario;
+        _engine = runtime.Simulation;
+        ApplyRuntime(runtime);
+
+        State = SimulationState.Ready;
+        OnPropertyChanged(nameof(Scenario));
         NotifyCommands();
     }
 
