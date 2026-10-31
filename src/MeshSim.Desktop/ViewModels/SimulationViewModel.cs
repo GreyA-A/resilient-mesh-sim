@@ -144,6 +144,14 @@ public sealed class SimulationViewModel : ViewModelBase
         ReplaceRuntime(scenario);
     }
 
+    /// <summary>
+    /// Повертає незалежний знімок метрик і журналу подій на поточний момент (для експорту звіту).
+    /// </summary>
+    public SimulationResult GetCurrentSnapshot()
+    {
+        return _engine.GetSnapshot();
+    }
+
     private bool CanPlay()
     {
         return _state != SimulationState.Running && _engine.HasPendingEvents;
