@@ -4,8 +4,8 @@
         xmlns:controls="using:MeshSim.Desktop.Controls"
         x:Class="MeshSim.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Width="1280" Height="760"
-        MinWidth="900" MinHeight="520"
+        Width="1500" Height="800"
+        MinWidth="1100" MinHeight="560"
         Title="{Binding Title}">
 	<DockPanel>
 
@@ -42,6 +42,83 @@
 				</ComboBox>
 			</StackPanel>
 		</Border>
+
+		<ScrollViewer DockPanel.Dock="Left"
+					  Width="330"
+					  HorizontalScrollBarVisibility="Disabled"
+					  DataContext="{Binding Editor}"
+					  x:DataType="vm:SceneEditorViewModel">
+			<StackPanel Margin="12" Spacing="6">
+
+				<TextBlock Text="Редактор сцени" FontSize="16" FontWeight="SemiBold" />
+				<TextBlock Text="{Binding SelectionText}" TextWrapping="Wrap" />
+				<TextBlock Text="Перетягуйте вузли й зони мишею. Будь-яка правка скидає прогін; під час виконання редагування вимкнено."
+						   TextWrapping="Wrap" FontSize="11" Opacity="0.7" />
+
+				<Border IsVisible="{Binding HasError}"
+						Background="#33E74C3C"
+						Padding="8"
+						CornerRadius="4">
+					<TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+				</Border>
+
+				<StackPanel Spacing="6" IsEnabled="{Binding IsEditingEnabled}">
+
+					<TextBlock Text="Вузол" FontWeight="SemiBold" Margin="0,10,0,0" />
+					<TextBox Text="{Binding NodeId}" Watermark="Id вузла" />
+					<Grid ColumnDefinitions="*,*">
+						<TextBox Grid.Column="0" Text="{Binding NodeX}" Watermark="X, м" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding NodeY}" Watermark="Y, м" Margin="3,0,0,0" />
+					</Grid>
+					<Grid ColumnDefinitions="*,*">
+						<TextBox Grid.Column="0" Text="{Binding NodeRange}" Watermark="Радіус, м" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding NodeBattery}" Watermark="Заряд, %" Margin="3,0,0,0" />
+					</Grid>
+					<Button Content="Додати вузол" Command="{Binding AddNodeCommand}" />
+					<Button Content="Видалити вибраний вузол" Command="{Binding RemoveNodeCommand}" />
+
+					<TextBlock Text="Зона завад" FontWeight="SemiBold" Margin="0,10,0,0" />
+					<TextBox Text="{Binding ZoneId}" Watermark="Id зони" />
+					<Grid ColumnDefinitions="*,*">
+						<TextBox Grid.Column="0" Text="{Binding ZoneX}" Watermark="X, м" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding ZoneY}" Watermark="Y, м" Margin="3,0,0,0" />
+					</Grid>
+					<Grid ColumnDefinitions="*,*">
+						<TextBox Grid.Column="0" Text="{Binding ZoneRadius}" Watermark="Радіус, м" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding ZoneIntensity}" Watermark="Інтенсивність 0..1" Margin="3,0,0,0" />
+					</Grid>
+					<Button Content="Додати зону" Command="{Binding AddZoneCommand}" />
+					<Button Content="Перемкнути активність вибраної зони" Command="{Binding ToggleZoneCommand}" />
+					<Button Content="Видалити вибрану зону" Command="{Binding RemoveZoneCommand}" />
+
+					<TextBlock Text="Пакет" FontWeight="SemiBold" Margin="0,10,0,0" />
+					<TextBox Text="{Binding PacketId}" Watermark="Id пакета" />
+					<Grid ColumnDefinitions="*,*">
+						<TextBox Grid.Column="0" Text="{Binding PacketSource}" Watermark="Відправник" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding PacketDestination}" Watermark="Отримувач" Margin="3,0,0,0" />
+					</Grid>
+					<Grid ColumnDefinitions="*,*,*">
+						<TextBox Grid.Column="0" Text="{Binding PacketTtl}" Watermark="TTL" Margin="0,0,3,0" />
+						<TextBox Grid.Column="1" Text="{Binding PacketPayloadBytes}" Watermark="Байт" Margin="3,0,3,0" />
+						<TextBox Grid.Column="2" Text="{Binding PacketScheduledTimeMs}" Watermark="t, мс" Margin="3,0,0,0" />
+					</Grid>
+					<Button Content="Додати пакет" Command="{Binding AddPacketCommand}" />
+
+					<TextBlock Text="Заплановані пакети" FontWeight="SemiBold" Margin="0,10,0,0" />
+					<ListBox ItemsSource="{Binding Packets}"
+							 SelectedItem="{Binding SelectedPacket}"
+							 MaxHeight="160">
+						<ListBox.ItemTemplate>
+							<DataTemplate x:DataType="vm:PacketRow">
+								<TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="12" />
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+					<Button Content="Видалити вибраний пакет" Command="{Binding RemovePacketCommand}" />
+
+				</StackPanel>
+			</StackPanel>
+		</ScrollViewer>
 
 		<Border DockPanel.Dock="Right"
 				Width="380"
@@ -100,7 +177,7 @@
 			</DockPanel>
 		</Border>
 
-		<controls:MapControl Map="{Binding Map}" />
+		<controls:MapControl Map="{Binding Map}" Editor="{Binding Editor}" />
 
 	</DockPanel>
 </Window>

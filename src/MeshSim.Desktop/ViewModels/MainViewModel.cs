@@ -7,7 +7,8 @@ using MeshSim.Engine.IO;
 namespace MeshSim.Desktop.ViewModels;
 
 /// <summary>
-/// Модель подання головного вікна: завантажує демонстраційний сценарій, тримає карту та керування симуляцією.
+/// Модель подання головного вікна: завантажує демонстраційний сценарій, тримає карту,
+/// керування симуляцією та редактор сцени.
 /// </summary>
 public sealed class MainViewModel : ViewModelBase
 {
@@ -24,6 +25,7 @@ public sealed class MainViewModel : ViewModelBase
         Title = AppTitle;
         Map = new MapViewModel();
         Simulation = new SimulationViewModel(Map, scenario, timer, logger);
+        Editor = new SceneEditorViewModel(Simulation, logger);
         _statusText = string.Create(
             CultureInfo.InvariantCulture,
             $"Сценарій «{scenario.Name}»: вузлів — {scenario.Nodes.Count}, зон завад — {scenario.JammingZones.Count}, пакетів — {scenario.Packets.Count}.");
@@ -34,6 +36,7 @@ public sealed class MainViewModel : ViewModelBase
     public string Title { get; }
     public MapViewModel Map { get; }
     public SimulationViewModel Simulation { get; }
+    public SceneEditorViewModel Editor { get; }
 
     public string StatusText
     {

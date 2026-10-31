@@ -3,13 +3,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using MeshSim.Desktop.Rendering;
 using MeshSim.Desktop.ViewModels;
 
 namespace MeshSim.Desktop.Controls;
 
-[ExcludeFromCodeCoverage(Justification = "Кастомний контрол: лише малювання готової MapScene через DrawingContext, без обчислень. Уся логіка винесена в тестовані класи Rendering.")]
+[ExcludeFromCodeCoverage(Justification = "Кастомний контрол: малювання готової MapScene через DrawingContext і делегування подій миші редактору, без обчислень. Уся логіка винесена в тестовані класи Rendering та ViewModels.")]
 public sealed class MapControl : Control
 {
     private const double BatteryBarWidth = 24.0;
@@ -18,6 +19,9 @@ public sealed class MapControl : Control
 
     public static readonly StyledProperty<MapViewModel?> MapProperty =
         AvaloniaProperty.Register<MapControl, MapViewModel?>(nameof(Map));
+
+    public static readonly StyledProperty<SceneEditorViewModel?> EditorProperty =
+        AvaloniaProperty.Register<MapControl, SceneEditorViewModel?>(nameof(Editor));
 
     static MapControl()
     {
@@ -33,6 +37,12 @@ public sealed class MapControl : Control
     {
         get => GetValue(MapProperty);
         set => SetValue(MapProperty, value);
+    }
+
+    public SceneEditorViewModel? Editor
+    {
+        get => GetValue(EditorProperty);
+        set => SetValue(EditorProperty, value);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -61,6 +71,43 @@ public sealed class MapControl : Control
         Size arranged = base.ArrangeOverride(finalSize);
         Map?.Resize(arranged.Width, arranged.Height);
         return arranged;
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+
+        SceneEditorViewModel? editor = Editor;
+        if (editor is null || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        editor.PointerPressed(ToScreenPoint(e.GetPosition(this)));
+        e.Pointer.Capture(this);
+        e.Handled = true;
+    }
+
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+
+        Editor?.PointerMoved(ToScreenPoint(e.GetPosition(this)));
+    }
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+
+        Editor?.PointerReleased();
+        e.Pointer.Capture(null);
+    }
+
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    {
+        base.OnPointerCaptureLost(e);
+
+        Editor?.PointerReleased();
     }
 
     public override void Render(DrawingContext context)
@@ -101,6 +148,11 @@ public sealed class MapControl : Control
         foreach (NodeVisual node in scene.Nodes)
         {
             DrawNode(context, node);
+        }
+
+        if (scene.Selection is { } selection)
+        {
+            DrawSelection(context, selection);
         }
 
         if (scene.Marker is { } marker)
@@ -163,6 +215,12 @@ public sealed class MapControl : Control
         DrawCenteredLabel(context, node.BatteryText, center.X, barTop + BatteryBarHeight + 2.0, anchorAbove: false);
     }
 
+    private static void DrawSelection(DrawingContext context, SelectionVisual selection)
+    {
+        var pen = new Pen(CreateBrush(MapPalette.SelectionRing), 2.0, DashStyle.Dash);
+        context.DrawEllipse(null, pen, ToPoint(selection.Center), selection.RadiusPx, selection.RadiusPx);
+    }
+
     private static void DrawMarker(DrawingContext context, PacketMarkerVisual marker)
     {
         Point center = ToPoint(marker.Position);
@@ -199,5 +257,10 @@ public sealed class MapControl : Control
     private static Point ToPoint(ScreenPoint point)
     {
         return new Point(point.X, point.Y);
+    }
+
+    private static ScreenPoint ToScreenPoint(Point point)
+    {
+        return new ScreenPoint(point.X, point.Y);
     }
 }
