@@ -29,7 +29,7 @@
 ## Технологічний стек
 * **Платформа:** .NET 8 LTS (C# 12)
 * **Графічний інтерфейс:** Avalonia UI (XAML, CommunityToolkit.Mvvm)
-* **Тестування та метрики:** xUnit, Coverlet (XPlat Code Coverage)
+* **Тестування та метрики:** xUnit, Coverlet (MSBuild; звіти JSON і Cobertura)
 * **Аналіз коду:** Microsoft Roslyn Analyzers (`AnalysisMode=Recommended`)
 * **Автоматизація:** GitHub Actions CI (Ubuntu + Windows)
 
@@ -77,7 +77,7 @@ resilient-mesh-sim/
    ```bash
    dotnet build ResilientMesh.sln --configuration Release --no-restore
    ```
-4. **Запустити автотести (таблицю покриття Coverlet буде виведено в консоль, JSON-звіт `coverage.json` з'явиться в каталозі тестового проєкту):**
+4. **Запустити автотести (таблицю покриття Coverlet буде виведено в консоль, звіти `coverage.json` та `coverage.cobertura.xml` з'являться в каталозі `TestResults/coverage/`):**
    ```bash
    dotnet test ResilientMesh.sln --configuration Release --no-build --verbosity normal
    ```
@@ -112,6 +112,24 @@ resilient-mesh-sim/
 ```bash
 dotnet test ResilientMesh.sln --configuration Release --filter "FullyQualifiedName~AcceptanceTests"
 ```
+
+---
+
+## Якість і CI
+
+Збірка вважає попередження помилками (`TreatWarningsAsErrors`), аналізатор працює в режимі `Recommended`. Попередження NuGet Audit про недоступність джерела пакетів (`NU1900`) та про вразливості залежностей (`NU1901–NU1904`) лишаються попередженнями й збірку не ламають, але їх видно в логах.
+
+Покриття збирає єдиний механізм `coverlet.msbuild`. Типові команди:
+
+```bash
+# Швидкий цикл: тести з таблицею покриття, без перевірки порогу (працює і з --filter)
+dotnet test ResilientMesh.sln --configuration Release
+
+# Повна перевірка, як у CI: поріг 100% для Line, Branch та Method кожного модуля
+dotnet test ResilientMesh.sln --configuration Release -p:Threshold=100
+```
+
+Не поєднуйте `--filter` із `-p:Threshold`: запуск частини тестів завжди дає неповне покриття. У GitHub Actions (Ubuntu та Windows) поріг задає змінна `COVERAGE_THRESHOLD` у `.github/workflows/ci.yml`, а звіти покриття кожної ОС публікуються як артефакт `coverage-<ОС>` (вкладка «Summary» запуску).
 
 ---
 
