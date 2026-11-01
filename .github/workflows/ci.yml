@@ -6,13 +6,25 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
+env:
+  # Мінімальне покриття (Line, Branch, Method) для кожного модуля.
+  # Критерій C3 вимагає не менше 80%; проєкт тримає 100%. Змінюйте лише тут.
+  COVERAGE_THRESHOLD: 100
+
 jobs:
   build-and-test:
     name: Build and Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - name: Checkout repository
@@ -26,13 +38,27 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ResilientMesh.sln
 
-    - name: Build solution (Release)
+    - name: Build solution (Release, warnings as errors)
       run: dotnet build ResilientMesh.sln --configuration Release --no-restore
 
-    - name: Run unit tests with code coverage
+    - name: Run tests and enforce coverage threshold
       run: >
         dotnet test ResilientMesh.sln
         --configuration Release
         --no-build
         --verbosity normal
-        --collect:"XPlat Code Coverage"
+        /p:Threshold=$COVERAGE_THRESHOLD
+
+    - name: Verify coverage reports were produced
+      run: |
+        test -f TestResults/coverage/coverage.json
+        test -n "$(ls TestResults/coverage/*.xml 2>/dev/null)"
+
+    - name: Upload coverage report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-${{ matrix.os }}
+        path: TestResults/coverage/
+        if-no-files-found: warn
+        retention-days: 14
