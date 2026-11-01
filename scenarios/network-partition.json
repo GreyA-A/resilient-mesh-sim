@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "name": "Розділення мережі завадою",
+  "routingStrategy": "Dijkstra",
+  "engine": {
+    "hopDelayMs": 10,
+    "energyPerTransmissionPercent": 1
+  },
+  "nodes": [
+    {
+      "id": "A",
+      "x": 0,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    },
+    {
+      "id": "B",
+      "x": 100,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    },
+    {
+      "id": "C",
+      "x": 200,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    },
+    {
+      "id": "D",
+      "x": 300,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    }
+  ],
+  "jammingZones": [
+    {
+      "id": "J1",
+      "x": 150,
+      "y": 0,
+      "radiusMeters": 20,
+      "jammingIntensity": 1,
+      "isActive": true
+    }
+  ],
+  "packets": [
+    {
+      "id": "P1",
+      "sourceNodeId": "A",
+      "destinationNodeId": "B",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 0
+    },
+    {
+      "id": "P2",
+      "sourceNodeId": "A",
+      "destinationNodeId": "D",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 50
+    },
+    {
+      "id": "P3",
+      "sourceNodeId": "D",
+      "destinationNodeId": "C",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 100
+    }
+  ]
+}
