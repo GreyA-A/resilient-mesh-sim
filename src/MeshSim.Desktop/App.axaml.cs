@@ -9,7 +9,7 @@ using MeshSim.Desktop.Views;
 
 namespace MeshSim.Desktop;
 
-[ExcludeFromCodeCoverage(Justification = "Кореневий клас Avalonia: композиція вікна та реєстрація обробників, без власної логіки.")]
+[ExcludeFromCodeCoverage(Justification = "Кореневий клас Avalonia: композиція вікна, діалогів та реєстрація обробників, без власної логіки.")]
 public partial class App : Application
 {
     public override void Initialize()
@@ -21,10 +21,17 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var handler = new GlobalExceptionHandler(AppServices.Logger, new ErrorDialogNotifier());
+            var notifier = new ErrorDialogNotifier();
+            var handler = new GlobalExceptionHandler(AppServices.Logger, notifier);
             RegisterGlobalHandlers(handler);
 
-            desktop.MainWindow = new MainWindow { DataContext = new MainViewModel(AppServices.Logger, new AvaloniaSimulationTimer()) };
+            var window = new MainWindow();
+            window.DataContext = new MainViewModel(
+                AppServices.Logger,
+                new AvaloniaSimulationTimer(),
+                new AvaloniaFileDialogService(window),
+                notifier);
+            desktop.MainWindow = window;
         }
 
         base.OnFrameworkInitializationCompleted();

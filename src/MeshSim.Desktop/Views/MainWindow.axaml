@@ -19,6 +19,25 @@
 			</Grid>
 		</Border>
 
+		<Border DockPanel.Dock="Bottom"
+		IsVisible="{Binding HasImportedReport}"
+		MaxHeight="190"
+		Padding="12,8"
+		BorderThickness="0,1,0,0"
+		BorderBrush="#40808080"
+		DataContext="{Binding Files}"
+		x:DataType="vm:FileOperationsViewModel">
+			<DockPanel>
+				<Button DockPanel.Dock="Right"
+						VerticalAlignment="Top"
+						Content="Закрити звіт"
+						Command="{Binding CloseReportCommand}" />
+				<ScrollViewer>
+					<TextBlock Text="{Binding ImportedReportText}" TextWrapping="Wrap" />
+				</ScrollViewer>
+			</DockPanel>
+		</Border>
+
 		<Border DockPanel.Dock="Top"
 				Padding="10,8"
 				BorderThickness="0,0,0,1"
@@ -40,6 +59,21 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
+			</StackPanel>
+		</Border>
+
+		<Border DockPanel.Dock="Top"
+		Padding="10,6"
+		BorderThickness="0,0,0,1"
+		BorderBrush="#40808080"
+		DataContext="{Binding Files}"
+		x:DataType="vm:FileOperationsViewModel">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<Button Content="Відкрити сценарій…" Command="{Binding OpenScenarioCommand}" />
+				<Button Content="Зберегти сценарій…" Command="{Binding SaveScenarioCommand}" />
+				<Button Content="Експорт звіту JSON…" Command="{Binding ExportReportJsonCommand}" />
+				<Button Content="Експорт журналу CSV…" Command="{Binding ExportReportCsvCommand}" />
+				<Button Content="Відкрити звіт JSON…" Command="{Binding OpenReportCommand}" />
 			</StackPanel>
 		</Border>
 
