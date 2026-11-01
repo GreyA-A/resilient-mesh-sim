@@ -1,11 +1,22 @@
 <Project>
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <AnalysisMode>Recommended</AnalysisMode>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	<CollectCoverage>true</CollectCoverage>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AnalysisMode>Recommended</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+		<!-- Критерій C4: будь-яке попередження компілятора чи аналізатора ламає збірку. -->
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+		<!--
+      Попередження NuGet Audit лишаються попередженнями, але не ламають збірку:
+      NU1900 (немає доступу до api.nuget.org) та NU1901-NU1904 (знайдено вразливість у залежності).
+      Без цього збірка без інтернету (критерій E3) або вразливість, оприлюднена напередодні захисту,
+      зламали б проєкт, а видимість попереджень у логах зберігається.
+        -->
+		<WarningsNotAsErrors>$(WarningsNotAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+
+		<CollectCoverage>true</CollectCoverage>
+	</PropertyGroup>
 </Project>
