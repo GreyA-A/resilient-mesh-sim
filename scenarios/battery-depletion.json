@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "name": "Виснаження вузла-ретранслятора",
+  "routingStrategy": "Dijkstra",
+  "engine": {
+    "hopDelayMs": 10,
+    "energyPerTransmissionPercent": 25
+  },
+  "nodes": [
+    {
+      "id": "A",
+      "x": 0,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    },
+    {
+      "id": "R1",
+      "x": 100,
+      "y": 40,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 30
+    },
+    {
+      "id": "R2",
+      "x": 100,
+      "y": -90,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    },
+    {
+      "id": "D",
+      "x": 200,
+      "y": 0,
+      "transmissionRangeMeters": 140,
+      "batteryLevelPercent": 100
+    }
+  ],
+  "jammingZones": [],
+  "packets": [
+    {
+      "id": "P1",
+      "sourceNodeId": "A",
+      "destinationNodeId": "D",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 0
+    },
+    {
+      "id": "P2",
+      "sourceNodeId": "A",
+      "destinationNodeId": "D",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 100
+    },
+    {
+      "id": "P3",
+      "sourceNodeId": "A",
+      "destinationNodeId": "D",
+      "ttl": 6,
+      "payloadBytes": 64,
+      "scheduledTimeMs": 200
+    }
+  ]
+}

@@ -1,13 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MeshSim.Desktop.Logging;
 using MeshSim.Desktop.ViewModels;
+using MeshSim.Engine.IO;
+using static MeshSim.Tests.ScenarioTestData;
 
 namespace MeshSim.Tests;
 
 public class MainViewModelTests
 {
-    private static MainViewModel Create(ListLogger? logger = null)
-        => new(logger ?? new ListLogger(), new ManualSimulationTimer());
+    private static MainViewModel Create(ListLogger? logger = null, StubFileDialogService? dialogs = null)
+        => new(logger ?? new ListLogger(), new ManualSimulationTimer(), dialogs ?? new StubFileDialogService(), new RecordingNotifier());
 
     [Fact]
     public void ConstructorSetsTitleAndLogsInitialization()
@@ -36,14 +38,15 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void EditorIsWiredToSimulationAndMap()
+    public void EditorAndFilesAreWiredToSimulationAndMap()
     {
         MainViewModel viewModel = Create();
 
         Assert.Same(viewModel.Simulation, viewModel.Editor.Simulation);
         Assert.Same(viewModel.Map, viewModel.Editor.Map);
         Assert.Single(viewModel.Editor.Packets);
-        Assert.True(viewModel.Editor.IsEditingEnabled);
+        Assert.NotNull(viewModel.Files);
+        Assert.False(viewModel.Files.HasImportedReport);
     }
 
     [Fact]
@@ -57,6 +60,21 @@ public class MainViewModelTests
         Assert.False(viewModel.Editor.HasError);
         Assert.Equal(7, viewModel.Simulation.Scenario.Nodes.Count);
         Assert.True(viewModel.Map.Topology.Nodes.ContainsKey("N7"));
+    }
+
+    [Fact]
+    public async Task FileOperationsReportTheirStatusThroughMainStatusText()
+    {
+        using var temp = new TempDirectory();
+        string path = temp.FilePath("opened.json");
+        ScenarioFile.Save(path, JammedChain());
+        MainViewModel viewModel = Create(dialogs: new StubFileDialogService { OpenScenarioPath = path });
+
+        await viewModel.Files.OpenScenarioAsync();
+
+        Assert.Equal("Сценарій «Jammed chain» відкрито з файлу opened.json.", viewModel.StatusText);
+        Assert.Equal(3, viewModel.Map.Topology.Nodes.Count);
+        Assert.Equal("Jammed chain", viewModel.Simulation.Scenario.Name);
     }
 
     [Fact]
@@ -111,7 +129,14 @@ public class MainViewModelTests
     [Fact]
     public void ConstructorThrowsArgumentNullExceptionForNullArguments()
     {
-        Assert.Throws<ArgumentNullException>(() => new MainViewModel(null!, new ManualSimulationTimer()));
-        Assert.Throws<ArgumentNullException>(() => new MainViewModel(new ListLogger(), null!));
+        var logger = new ListLogger();
+        var timer = new ManualSimulationTimer();
+        var dialogs = new StubFileDialogService();
+        var notifier = new RecordingNotifier();
+
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(null!, timer, dialogs, notifier));
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(logger, null!, dialogs, notifier));
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(logger, timer, null!, notifier));
+        Assert.Throws<ArgumentNullException>(() => new MainViewModel(logger, timer, dialogs, null!));
     }
 }
