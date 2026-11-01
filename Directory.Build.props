@@ -16,7 +16,5 @@
       зламали б проєкт, а видимість попереджень у логах зберігається.
         -->
 		<WarningsNotAsErrors>$(WarningsNotAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
-
-		<CollectCoverage>true</CollectCoverage>
 	</PropertyGroup>
 </Project>

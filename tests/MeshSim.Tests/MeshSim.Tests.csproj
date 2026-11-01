@@ -1,39 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
 
-	<Include>[MeshSim.Core]*,[MeshSim.Engine]*,[MeshSim.Desktop]*</Include>
-	<Exclude>[MeshSim.Desktop]CompiledAvaloniaXaml.*</Exclude>
-  </PropertyGroup>
+	<!--
+    Покриття коду: єдиний механізм coverlet.msbuild (ADR-016).
+    Поріг (Threshold) тут свідомо не задано: його передають явно в CI та в команді повної перевірки
+    (/p:Threshold=100), тож запуск окремих тестів через - -filter ніколи не падає через покриття.
+    Типи порогу за замовчуванням: line, branch, method (для кожного модуля).
+  -->
+	<PropertyGroup>
+		<CollectCoverage>true</CollectCoverage>
+		<CoverletOutputFormat>json,cobertura</CoverletOutputFormat>
+		<CoverletOutput>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..', 'TestResults', 'coverage'))</CoverletOutput>
+		<Include>[MeshSim.Core]*,[MeshSim.Engine]*,[MeshSim.Desktop]*</Include>
+		<Exclude>[MeshSim.Desktop]CompiledAvaloniaXaml.*</Exclude>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="10.1.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.msbuild" Version="10.1.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.5.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.msbuild" Version="10.1.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="xunit" Version="2.5.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MeshSim.Core\MeshSim.Core.csproj" />
-    <ProjectReference Include="..\..\src\MeshSim.Engine\MeshSim.Engine.csproj" />
-    <ProjectReference Include="..\..\src\MeshSim.Desktop\MeshSim.Desktop.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\MeshSim.Core\MeshSim.Core.csproj" />
+		<ProjectReference Include="..\..\src\MeshSim.Engine\MeshSim.Engine.csproj" />
+		<ProjectReference Include="..\..\src\MeshSim.Desktop\MeshSim.Desktop.csproj" />
+	</ItemGroup>
 
 </Project>
