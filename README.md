@@ -126,10 +126,10 @@ dotnet test ResilientMesh.sln --configuration Release --filter "FullyQualifiedNa
 dotnet test ResilientMesh.sln --configuration Release
 
 # Повна перевірка, як у CI: поріг 100% для Line, Branch та Method кожного модуля
-dotnet test ResilientMesh.sln --configuration Release /p:Threshold=100
+dotnet test ResilientMesh.sln --configuration Release -p:Threshold=100
 ```
 
-Не поєднуйте `--filter` із `/p:Threshold`: запуск частини тестів завжди дає неповне покриття. У GitHub Actions (Ubuntu та Windows) поріг задає змінна `COVERAGE_THRESHOLD` у `.github/workflows/ci.yml`, а звіти покриття кожної ОС публікуються як артефакт `coverage-<ОС>` (вкладка «Summary» запуску).
+Не поєднуйте `--filter` із `-p:Threshold`: запуск частини тестів завжди дає неповне покриття. У GitHub Actions (Ubuntu та Windows) поріг задає змінна `COVERAGE_THRESHOLD` у `.github/workflows/ci.yml`, а звіти покриття кожної ОС публікуються як артефакт `coverage-<ОС>` (вкладка «Summary» запуску).
 
 ---
 

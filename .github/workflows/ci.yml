@@ -47,7 +47,7 @@ jobs:
         --configuration Release
         --no-build
         --verbosity normal
-        /p:Threshold=$COVERAGE_THRESHOLD
+        -p:Threshold=$COVERAGE_THRESHOLD
 
     - name: Verify coverage reports were produced
       run: |
